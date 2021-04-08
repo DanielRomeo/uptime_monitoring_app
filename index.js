@@ -3,7 +3,7 @@ const http = require("http");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
 
-const server = http.createServer((request: any, response: any) => {
+const server = http.createServer((request, response) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
     
     console.clear();
@@ -13,7 +13,7 @@ const server = http.createServer((request: any, response: any) => {
     let trimmedPath = path.replace(/^\/+|\/+$/g, ""); // trims away all slashes in the url
 
     // get the Http method(get, post, put, delete)
-    let method: string = request.method.toLowerCase();
+    let method = request.method.toLowerCase();
 
     // get the headers as an object
     const headers = request.headers;
@@ -25,7 +25,7 @@ const server = http.createServer((request: any, response: any) => {
     //-> we do this becuase we get the data bits by bit)
     let decoder = new stringDecoder("utf-8");
     let buffer = "";
-    request.on("data", (data: string) => {
+    request.on("data", (data) => {
         buffer += decoder.write(data);
     });
 
