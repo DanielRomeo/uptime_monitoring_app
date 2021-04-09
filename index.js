@@ -3,20 +3,20 @@ const http = require("http");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
 
-const server = http.createServer((request, response) => {
-    response.setHeader("Access-Control-Allow-Origin", "*");
+const server = http.createServer((req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
     
     console.clear();
     /*we're passing ture in order to tell it to call the "query string" module itself*/
-    const parsedUrl = url.parse(request.url, true);
+    const parsedUrl = url.parse(req.url, true);
     let path = parsedUrl.pathname;
     let trimmedPath = path.replace(/^\/+|\/+$/g, ""); // trims away all slashes in the url
 
     // get the Http method(get, post, put, delete)
-    let method = request.method.toLowerCase();
+    let method = req.method.toLowerCase();
 
     // get the headers as an object
-    const headers = request.headers;
+    const headers = req.headers;
 
     let querystringObject = parsedUrl.query;
 
@@ -25,20 +25,66 @@ const server = http.createServer((request, response) => {
     //-> we do this becuase we get the data bits by bit)
     let decoder = new stringDecoder("utf-8");
     let buffer = "";
-    request.on("data", (data) => {
+    req.on("data", (data) => {
         buffer += decoder.write(data);
     });
 
-    request.on("end", () => {
+    req.on("end", () => {
         buffer += decoder.end();
-        response.end("Hello world\n");
-    });
+        res.end("Hello world\n");
 
-    console.log(`Reacieved these headers : `, buffer);
-});
+        // choose the handler this request should go to:
+        // if one is not found, use the not-found handler
+        let chosenHandler = typeof(router[trimmedPath]) != undefined ? router[trimmedPath] : router.notFound;
+
+        // construct the data object to send to the handler:
+        let data = {
+            'trimmedPath': trimmedPath,
+            'querystringObject' : querystringObject,
+            'method': method,
+            'headers': headers,
+            'payload': payload
+        };
+
+        // with the data above, route the request:
+        chosenHandler(data, (statusCode, payload)=>{
+            // use status code called by handler...
+            // validate the status code:
+            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+
+            // use payload used by handler, set it to empty if there isint any
+            payloadString = typeof(payload) == 'object' ? payload: {};
+        }); // end of chosenHandler function
+        
+    }); // the end of end of the request
+
+    console.log(`Recieved these headers :`, buffer);
+
+}); // end of create server
 
 // start the server and tell it on which port it should listen on:
 const PORT = 5000;
 server.listen(PORT, () => {
     console.log(`Server is listening on post ${PORT}`);
 });
+
+/* write handlers*/
+
+let handlers = {};
+
+// sample handler:
+handlers.sample = (data, callback)=>{
+    // callback with http status code and payload object:
+    callback(406, {'name': 'sample handler'})
+}
+
+// not found handler:
+handlers.notFound = (data, callback)=>{
+    callback(404); // send the status code only
+}
+
+// define a request router:
+let router = {
+    'sample': handlers.sample,
+    'users': handlers.users
+}
