@@ -31,19 +31,19 @@ const server = http.createServer((req, res) => {
 
     req.on("end", () => {
         buffer += decoder.end();
-        res.end("Hello world\n");
-
+        
+        console.log(`trimmed path : ${trimmedPath}`)
         // choose the handler this request should go to:
         // if one is not found, use the not-found handler
-        let chosenHandler = typeof(router[trimmedPath]) != undefined ? router[trimmedPath] : router.notFound;
-
+        let chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+        console.log(chosenHandler)
         // construct the data object to send to the handler:
         let data = {
             'trimmedPath': trimmedPath,
             'querystringObject' : querystringObject,
             'method': method,
             'headers': headers,
-            'payload': payload
+            'payload': buffer
         };
 
         // with the data above, route the request:
@@ -53,12 +53,22 @@ const server = http.createServer((req, res) => {
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
 
             // use payload used by handler, set it to empty if there isint any
-            payloadString = typeof(payload) == 'object' ? payload: {};
+            payload = typeof(payload) == 'object' ? payload: {};
+
+            payloadString = JSON.stringify(payload);
+
+            // return the response
+            res.setHeader('Content-Type', 'application/json');
+            res.writeHead(statusCode);
+            res.end(payloadString); 
+
+            // log the request path   
+            console.log(`Return the response:`, statusCode, payloadString);
         }); // end of chosenHandler function
-        
+
     }); // the end of end of the request
 
-    console.log(`Recieved these headers :`, buffer);
+    
 
 }); // end of create server
 
@@ -76,6 +86,12 @@ let handlers = {};
 handlers.sample = (data, callback)=>{
     // callback with http status code and payload object:
     callback(406, {'name': 'sample handler'})
+}
+
+// users handler:
+handlers.users = (data, callback)=>{
+    // callback with http status code and payload object:
+    callback(406, {'name': 'users handler'})
 }
 
 // not found handler:
