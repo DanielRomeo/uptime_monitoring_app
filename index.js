@@ -110,6 +110,11 @@ handlers.sample = (data, callback)=>{
     callback(406, {'name': 'sample handler'})
 }
 
+// ping handlers:
+handlers.ping = (data, callback)=>{
+    callback(200)
+}
+
 // users handler:
 handlers.users = (data, callback)=>{
     // callback with http status code and payload object:
@@ -124,5 +129,6 @@ handlers.notFound = (data, callback)=>{
 // define a request router:
 let router = {
     'sample': handlers.sample,
-    'users': handlers.users
+    'users': handlers.users,
+    'ping': handlers.ping
 }
