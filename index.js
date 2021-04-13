@@ -1,16 +1,33 @@
 // create a http server and make it listen on port 5000:
 const http = require("http");
+const https = require("https");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
 const config = require('./config');
+const fs = require('fs');
 
-const server = http.createServer((req, res) => {
-   
+// the HTTP server:
+const httpServer = http.createServer((req, res) => {
+   unifiedServer(req, res);
 });
-
-server.listen(config.httpPort, () => {
+httpServer.listen(config.httpPort, () => {
     console.log(`Server is listening on post ${config.httpPort}, in ${config.envName}`);
 });
+
+// isntatiate the https server:
+let httpsServerOptions = {
+    'key': fs.readFileSync('./https/key.pem'),
+    'cert': fs.readFileSync('./https/cert.pem')
+}
+
+// the HTTPS server:
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+   unifiedServer(req, res);
+});
+httpsServer.listen(config.httpsPort, () => {
+    console.log(`Server is listening on post ${config.httpsPort}, in ${config.envName}`);
+});
+
 
 
 
