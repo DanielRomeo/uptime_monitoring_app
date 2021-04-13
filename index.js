@@ -2,12 +2,23 @@
 const http = require("http");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
-let config = require('./config');
+const config = require('./config');
 
 const server = http.createServer((req, res) => {
+   
+});
+
+server.listen(config.httpPort, () => {
+    console.log(`Server is listening on post ${config.httpPort}, in ${config.envName}`);
+});
+
+
+
+// all the server logic for the http and https server:
+let unifiedServer = (req, res) =>{
     res.setHeader("Access-Control-Allow-Origin", "*");
     
-    console.clear();
+   
     /*we're passing ture in order to tell it to call the "query string" module itself*/
     const parsedUrl = url.parse(req.url, true);
     let path = parsedUrl.pathname;
@@ -69,14 +80,8 @@ const server = http.createServer((req, res) => {
 
     }); // the end of end of the request
 
-    
+}
 
-}); // end of create server
-
-// start the server and tell it on which port it should listen on:
-server.listen(config.port, () => {
-    console.log(`Server is listening on post ${config.port} in ${config.envName} mode`);
-});
 
 /* write handlers*/
 
