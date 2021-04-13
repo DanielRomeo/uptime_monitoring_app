@@ -2,6 +2,7 @@
 const http = require("http");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
+let config = require('./config');
 
 const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -73,9 +74,8 @@ const server = http.createServer((req, res) => {
 }); // end of create server
 
 // start the server and tell it on which port it should listen on:
-const PORT = 5000;
-server.listen(PORT, () => {
-    console.log(`Server is listening on post ${PORT}`);
+server.listen(config.port, () => {
+    console.log(`Server is listening on post ${config.port} in ${config.envName} mode`);
 });
 
 /* write handlers*/
