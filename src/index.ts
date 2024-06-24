@@ -7,17 +7,38 @@ const server = http.createServer((request: any, response: any) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
     
     console.clear();
+    // console.log(typeof request)
+    
+    // print out the keys of the object:
+    // for(let key in request){
+    //     console.log("key is : "+ key)
+    // }
+
+    // console.log(request.url)
+
+
     /*we're passing ture in order to tell it to call the "query string" module itself*/
     const parsedUrl = url.parse(request.url, true);
-    let path = parsedUrl.pathname;
-    let trimmedPath = path.replace(/^\/+|\/+$/g, ""); // trims away all slashes in the url
+
+    console.log(parsedUrl)
+
+
+    let path: string = parsedUrl.pathname;
+
+    // trims away all slashes in the url, according  to my observation, this removed the leading slash:
+    let trimmedPath: string = path.replace(/^\/+|\/+$/g, ""); 
+
+    console.log("trimmed path is : " +trimmedPath); 
+
 
     // get the Http method(get, post, put, delete)
     let method: string = request.method.toLowerCase();
 
     // get the headers as an object
-    const headers = request.headers;
+    console.log(request.headers)
+    const headers: {} = request.headers;
 
+    console.log(parsedUrl.query);
     let querystringObject = parsedUrl.query;
 
     /*how a stream is dealt with*/
@@ -32,12 +53,11 @@ const server = http.createServer((request: any, response: any) => {
     request.on("end", () => {
         buffer += decoder.end();
         response.end("Hello world\n");
+        // cant write again after the response.end()
     });
 
-    console.log(`Reacieved these headers : `, buffer);
+    console.log(`Recieved these headers : `, buffer);
 });
-
-
 
 // start the server and tell it on which port it should listen on:
 const PORT = 5000;
