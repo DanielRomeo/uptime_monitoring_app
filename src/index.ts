@@ -7,14 +7,7 @@ const server = http.createServer((request: any, response: any) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
     
     console.clear();
-    // console.log(typeof request)
-    
-    // print out the keys of the object:
-    // for(let key in request){
-    //     console.log("key is : "+ key)
-    // }
-
-    // console.log(request.url)
+   
 
 
     /*we're passing ture in order to tell it to call the "query string" module itself*/
@@ -41,19 +34,43 @@ const server = http.createServer((request: any, response: any) => {
     console.log(parsedUrl.query);
     let querystringObject = parsedUrl.query;
 
+    // headers:
+    console.log("headers are : "+ headers)
+    console.log(headers)
+
     /*how a stream is dealt with*/
     // get the payload if any and decode it to utf8 and append it to the openBuffer(
     //-> we do this becuase we get the data bits by bit)
     let decoder = new stringDecoder("utf-8");
     let buffer = "";
     request.on("data", (data: string) => {
-        buffer += decoder.write(data);
+        buffer += decoder.write(data); // decoding it to utf-8
     });
 
     request.on("end", () => {
         buffer += decoder.end();
         response.end("Hello world\n");
-        // cant write again after the response.end()
+
+        // Choose the handler, the request should go to :
+        var chooseHandler: any | string = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+
+        // Construct the data object to send to the handler:
+        const data : object = {
+            'trimmedPath': trimmedPath,
+            'queryStringObject': querystringObject,
+            'method': method,
+            'headers': headers,
+            'payload': buffer
+        }
+        // Route the request, as specified:
+        chooseHandler(data, (statusCode: any, payload: Buffer)=>{
+            // Use the status code called back by the handler, or the default to 200
+            // statusCode = 
+            // Use the payload called back by the handler or default to an empty object
+
+        });
+
+        // console.log("payload is : ", buffer)
     });
 
     console.log(`Recieved these headers : `, buffer);
@@ -66,3 +83,17 @@ server.listen(PORT, () => {
 });
 
 
+// Define handlers:
+let handlers : any = {};
+// Sample handlers:
+handlers.sample = function(data: any, callback: (value: number, {})=>{}){
+    callback(406, {"name": "sample handler"});
+}
+// Not found handler:
+handlers.notFound = function(data: any, callback: any){
+    callback(404);
+}
+// Define request router:
+const router: any  = {
+    'sample': handlers.sample
+}
