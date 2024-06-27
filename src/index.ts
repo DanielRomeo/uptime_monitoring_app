@@ -2,6 +2,7 @@
 const http = require("http");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
+var config = require('./config');
 
 const server = http.createServer((request: any, response: any) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
@@ -71,6 +72,7 @@ const server = http.createServer((request: any, response: any) => {
             var payloadString: string = JSON.stringify(payload);
 
             // return the response:
+            response.setHeader('Content-Type', 'application/json');
             response.writeHead(statusCode);
             response.end(payloadString);
             console.log(`Returning this repsonse: `, statusCode, payloadString);
@@ -82,9 +84,9 @@ const server = http.createServer((request: any, response: any) => {
 });
 
 // start the server and tell it on which port it should listen on:
-const PORT = 5000;
+const PORT: number = config.port;
 server.listen(PORT, () => {
-    console.log(`Server is listening on post ${PORT}`);
+    console.log(`Server is listening on post ${PORT}, in config: ${config.envName} mode.`);
 });
 
 
