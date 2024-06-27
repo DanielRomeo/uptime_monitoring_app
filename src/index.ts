@@ -6,14 +6,10 @@ const stringDecoder = require("string_decoder").StringDecoder;
 const server = http.createServer((request: any, response: any) => {
     response.setHeader("Access-Control-Allow-Origin", "*");
     
-    console.clear();
-   
-
-
     /*we're passing ture in order to tell it to call the "query string" module itself*/
     const parsedUrl = url.parse(request.url, true);
 
-    console.log(parsedUrl)
+    // console.log(parsedUrl)
 
 
     let path: string = parsedUrl.pathname;
@@ -21,7 +17,7 @@ const server = http.createServer((request: any, response: any) => {
     // trims away all slashes in the url, according  to my observation, this removed the leading slash:
     let trimmedPath: string = path.replace(/^\/+|\/+$/g, ""); 
 
-    console.log("trimmed path is : " +trimmedPath); 
+    // console.log("trimmed path is : " +trimmedPath); 
 
 
     // get the Http method(get, post, put, delete)
@@ -35,12 +31,12 @@ const server = http.createServer((request: any, response: any) => {
     let querystringObject = parsedUrl.query;
 
     // headers:
-    console.log("headers are : "+ headers)
-    console.log(headers)
+    // console.log("headers are : "+ headers)
+    // console.log(headers)
 
     /*how a stream is dealt with*/
-    // get the payload if any and decode it to utf8 and append it to the openBuffer(
-    //-> we do this becuase we get the data bits by bit)
+    // get the payload if any and decode it to utf8 and append it to the openBuffer( we do this becuase we get the data bits by bit)
+
     let decoder = new stringDecoder("utf-8");
     let buffer = "";
     request.on("data", (data: string) => {
@@ -49,31 +45,40 @@ const server = http.createServer((request: any, response: any) => {
 
     request.on("end", () => {
         buffer += decoder.end();
-        response.end("Hello world\n");
+
 
         // Choose the handler, the request should go to :
         var chooseHandler: any | string = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
 
         // Construct the data object to send to the handler:
-        const data : object = {
+        const data : any = {
             'trimmedPath': trimmedPath,
             'queryStringObject': querystringObject,
             'method': method,
             'headers': headers,
             'payload': buffer
         }
+
         // Route the request, as specified:
-        chooseHandler(data, (statusCode: any, payload: Buffer)=>{
+        chooseHandler(data, (statusCode: number, payload: any)=>{
             // Use the status code called back by the handler, or the default to 200
-            // statusCode = 
+            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+
             // Use the payload called back by the handler or default to an empty object
+            payload = typeof(payload) == 'object' ?  payload : {};
+
+            // we need to send back a string, convert the payload to a string:
+            var payloadString: string = JSON.stringify(payload);
+
+            // return the response:
+            // response.writeHead(statusCode);
+            response.end(payloadString);
+            console.log(`Returning this repsonse: `, statusCode, payloadString);
 
         });
 
-        // console.log("payload is : ", buffer)
     });
 
-    console.log(`Recieved these headers : `, buffer);
 });
 
 // start the server and tell it on which port it should listen on:
