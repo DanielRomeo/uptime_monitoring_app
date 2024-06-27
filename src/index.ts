@@ -48,7 +48,7 @@ const server = http.createServer((request: any, response: any) => {
 
 
         // Choose the handler, the request should go to :
-        var chooseHandler: any | string = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+        var chooseHandler: any | string | undefined = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
 
         // Construct the data object to send to the handler:
         const data : any = {
@@ -71,7 +71,7 @@ const server = http.createServer((request: any, response: any) => {
             var payloadString: string = JSON.stringify(payload);
 
             // return the response:
-            // response.writeHead(statusCode);
+            response.writeHead(statusCode);
             response.end(payloadString);
             console.log(`Returning this repsonse: `, statusCode, payloadString);
 
