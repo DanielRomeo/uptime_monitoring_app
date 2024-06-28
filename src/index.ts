@@ -1,17 +1,45 @@
 // create a http server and make it listen on port 5000:
 const http = require("http");
+const https = require("https");
 const url = require("url");
 const stringDecoder = require("string_decoder").StringDecoder;
 var config = require('./config');
+var fs = require('fs');
 
-const server = http.createServer((request: any, response: any) => {
+import {Request, Response} from 'express'
+
+// Instatiate the HTTP SERVER:
+const httpServer = http.createServer((request: any, response: any) => {
+    unifiedServer(request, response)
+});
+
+// Start the HTTP SERVER:
+httpServer.listen(config.httpPort, () => {
+    console.log(`Server is listening on post ${config.httpPort}, in config: ${config.envName} mode.`);
+});
+
+// Instatiate the HTTPS SERVER:
+var httpsServerOptions = {
+    'key': fs.readFileSync('./https/key.pem'),
+    'cert': fs.readFileSync('./https/cert.pem')
+}
+const httpsServer = https.createServer(httpsServerOptions, (request: any, response: any) => {
+    unifiedServer(request, response)
+});
+
+// Start the HTTPS SERVER:
+httpsServer.listen(config.httpsPort, () => {
+    console.log(`Server is listening on post ${config.httpsPort}, in config: ${config.envName} mode.`);
+});
+
+
+// All the logic for the http and https server:
+var unifiedServer = function(request: any, response: any){
+
     response.setHeader("Access-Control-Allow-Origin", "*");
     
     /*we're passing ture in order to tell it to call the "query string" module itself*/
     const parsedUrl = url.parse(request.url, true);
-
-    // console.log(parsedUrl)
-
 
     let path: string = parsedUrl.pathname;
 
@@ -80,14 +108,7 @@ const server = http.createServer((request: any, response: any) => {
         });
 
     });
-
-});
-
-// start the server and tell it on which port it should listen on:
-const PORT: number = config.port;
-server.listen(PORT, () => {
-    console.log(`Server is listening on post ${PORT}, in config: ${config.envName} mode.`);
-});
+}
 
 
 // Define handlers:
